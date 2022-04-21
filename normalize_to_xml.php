@@ -40,7 +40,7 @@
         // set indent string to tab
         $writer->setIndentString("\t");
 
-        // start the document
+        // start the document, ensure encoding is UTF-8
         $writer->startDocument('1.0', 'UTF-8');
 
         // write root element
@@ -98,8 +98,8 @@
             }
         }
 
-        // echo the xml lines read
-        echo "<p>SplFileObject -> finished reading $file_name with $i lines</p>";
+        // // echo the xml lines read
+        // echo "<p>SplFileObject -> finished reading $file_name with $i lines</p>";
 
         // end element
         $writer->endElement();
