@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="station">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="rec"/>
+      </xs:sequence>
+      <xs:attribute name="geocode" use="required"/>
+      <xs:attribute name="id" use="required" type="xs:integer"/>
+      <xs:attribute name="name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="rec">
+    <xs:complexType>
+      <xs:attribute name="co" type="xs:decimal"/>
+      <xs:attribute name="no" type="xs:decimal"/>
+      <xs:attribute name="no2" type="xs:decimal"/>
+      <xs:attribute name="nox" type="xs:decimal"/>
+      <xs:attribute name="o3" type="xs:decimal"/>
+      <xs:attribute name="pm10" type="xs:decimal"/>
+      <xs:attribute name="siteid" use="required" type="xs:integer"/>
+      <xs:attribute name="so2" type="xs:decimal"/>
+      <xs:attribute name="ts" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
