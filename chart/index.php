@@ -31,6 +31,19 @@
         });
       }
 
+      function find_month_in_calculated_data(calculated_data, current_month)
+      {
+        for(var i = 0; i < calculated_data.length; i++)
+        {
+          if(calculated_data[i][0] == current_month)
+          {
+            return calculated_data[i];
+          }
+        }
+
+        return -1;
+      }
+
       //google.charts.setOnLoadCallback(update_selection_query);
       function traverse_and_fetch_records()
       {
@@ -131,23 +144,9 @@
         // WARNING
         // WARNING
         // WARNING
-
-        function find_month_in_calculated_data(current_month)
-        {
-          for(var i = 0; i < calculated_data.length; i++)
-          {
-            if(calculated_data[i][0] == current_month)
-            {
-              return calculated_data[i];
-            }
-          }
-
-          return -1;
-        }
-
         for(var i = 0; i < 12; i++)
         {
-          var data = find_month_in_calculated_data(i)
+          var data = find_month_in_calculated_data(calculated_data, i)
 
           //check if calculated_data has the month
           if(data != -1)
