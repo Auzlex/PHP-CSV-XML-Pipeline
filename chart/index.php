@@ -118,48 +118,12 @@
 
         console.log(calculated_data);
 
-        // console.log(sum, count, sum/count);
-
-        // // for all the data calculate each months average and append to the calculated_data array
-        // for(var i = 0; i < data.length; i++)
-        // {
-        //   // if the month is different from the last month
-        //   if(data[i][0] != last_month)
-        //   {
-        //     // if the last month is not 0
-        //     if(last_month != 0)
-        //     {
-        //       // calculate the average of the last month
-        //       var average = current_month_average / i;
-
-        //       console.log(average, i)
-
-        //       // append the average to the calculated_data array
-        //       calculated_data.push([last_month, average]);
-        //     }
-
-        //     // reset the current month average
-        //     current_month_average = 0;
-        //   }
-
-        //   // add the value to the current month average
-        //   current_month_average += data[i][1];
-
-        //   // set the last month to the current month
-        //   last_month = data[i][0];
-        // }
-
-
-        // insert an empty array into calculated_data array at the start
-        //calculated_data.unshift(["Month", "Average NO"]);
-
         data_array = [
           
             ["Month", "NO"],
           
         ]
 
-        
         // for every calculated_data push into data_array
         // NOTE: if the charts are displaying the wrong data, it might be because OF THIS FUNCTION
         // WARNING
