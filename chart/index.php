@@ -18,7 +18,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
+      //google.charts.load('current', {'packages':['corechart']});
       
       var records = null;
 
@@ -43,9 +43,9 @@
 
         var year = document.getElementById("year").value;
         var time = document.getElementById("time").value;
-        
-        //console.log(year, time)
 
+        console.log(year, time);
+        
         // get the last selected month
         var last_month = 0;
         var data = []; // empty array to store the data
@@ -63,6 +63,7 @@
           // check if the date and hours match selected year and time
           if(date.getFullYear() == year && date.getHours() == time)
           {
+            
             // fetch carbon monoxide value
             var value = records[i].getAttribute("no");
 
@@ -70,7 +71,7 @@
             var month = date.getMonth();
           
             // append the month number with value
-            data.push([parseInt(month), parseFloat(value)]);
+            data.push([parseInt(month), parseFloat(value), timestamp]);
           }
           
         }
@@ -78,41 +79,76 @@
         data.sort(function(a, b) {
           return a[0] - b[0];
         });
-        
-        //console.log(data);
+
+        console.log(data);
 
         var calculated_data = [];
 
-        // for all the data calculate each months average and append to the calculated_data array
+        sum = 0;
+        count = 0;
+
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        current_month = 0;
+        // for all of the data
         for(var i = 0; i < data.length; i++)
         {
-          // if the month is different from the last month
-          if(data[i][0] != last_month)
+          if(data[i][0] == current_month)
           {
-            // if the last month is not 0
-            if(last_month != 0)
-            {
-              // calculate the average of the last month
-              var average = current_month_average / i;
-
-              //console.log(i, current_month_average, average);
-
-              // append the average to the calculated_data array
-              calculated_data.push([last_month, average]);
-            }
-
-            // reset the current month average
-            current_month_average = 0;
+            sum += data[i][1];
+            count += 1;
           }
+          else if( data[i][0] != current_month )
+          {
+            // calculate average
+            current_month_average = sum / count;
+            calculated_data.push([current_month, current_month_average]);
+            console.log(current_month_average, months[current_month], sum, count);
+            
+            sum = 0;
+            count = 0;
+            
+            current_month = data[i][0];
 
-          // add the value to the current month average
-          current_month_average += data[i][1];
+            sum += data[i][1];
+            count += 1;
 
-          // set the last month to the current month
-          last_month = data[i][0];
+          }
         }
 
-        //console.log(calculated_data);
+        console.log(calculated_data);
+
+        // console.log(sum, count, sum/count);
+
+        // // for all the data calculate each months average and append to the calculated_data array
+        // for(var i = 0; i < data.length; i++)
+        // {
+        //   // if the month is different from the last month
+        //   if(data[i][0] != last_month)
+        //   {
+        //     // if the last month is not 0
+        //     if(last_month != 0)
+        //     {
+        //       // calculate the average of the last month
+        //       var average = current_month_average / i;
+
+        //       console.log(average, i)
+
+        //       // append the average to the calculated_data array
+        //       calculated_data.push([last_month, average]);
+        //     }
+
+        //     // reset the current month average
+        //     current_month_average = 0;
+        //   }
+
+        //   // add the value to the current month average
+        //   current_month_average += data[i][1];
+
+        //   // set the last month to the current month
+        //   last_month = data[i][0];
+        // }
+
 
         // insert an empty array into calculated_data array at the start
         //calculated_data.unshift(["Month", "Average NO"]);
@@ -131,18 +167,34 @@
         // WARNING
         // WARNING
         // WARNING
-        for(var i = 1; i < 13; i++)
+
+        function find_month_in_calculated_data(current_month)
         {
+          for(var i = 0; i < calculated_data.length; i++)
+          {
+            if(calculated_data[i][0] == current_month)
+            {
+              return calculated_data[i];
+            }
+          }
+
+          return -1;
+        }
+
+        for(var i = 0; i < 12; i++)
+        {
+          var data = find_month_in_calculated_data(i)
+
           //check if calculated_data has the month
-          if(calculated_data[i-1] != undefined)
+          if(data != -1)
           {
             //console.log(calculated_data[i][0], toMonthName(calculated_data[i][0]));
-            data_array.push([toMonthName(calculated_data[i-1][0]), calculated_data[i-1][1]]);
+            data_array.push([months[data[0]], data[1]]);
           }
           else
           {
             // append an empty array to the data_array
-            data_array.push([toMonthName(i), 0]);
+            data_array.push([ months[i], 0 ]);
           }
         }
 
@@ -227,12 +279,12 @@
         {
           // add an option to the element with id time of options
           if ((times[i]).toString().length == 1 ) {
-            $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + "0"+times[i] + ":00:00" + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
+            $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + "0"+times[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
           }
           else
           {
 
-            $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + times[i] + ":00:00" + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
+            $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + times[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
           }
         }
 
@@ -246,19 +298,24 @@
       function draw_chart(pre_computed_data)
       {
 
+        // load google charts
         google.charts.load('current', {
           packages: ['corechart'],
           language: 'nl'
         }).then(function () {
 
+          // format data for google charts
           var data = google.visualization.arrayToDataTable(pre_computed_data);
 
+          // format month
           var formatMonth = new google.visualization.DateFormat({
             pattern: 'MMM yyyy'
           });
+
           formatMonth.format(data, 0);
 
           /// https://developers.google.com/chart/interactive/docs/points
+          // options for the chart
           var options = {
             'title':'Average Carbon Monoxide (NO) per month',
             'titleTextStyle': { 'fontSize': 11 },
@@ -271,22 +328,11 @@
             'bar': { 'groupWidth': '80%' },
             'isStacked':true
           };
+
+          // generate scatter chart
           var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
           chart.draw(data, options);
         });
-
-        // var data = google.visualization.arrayToDataTable(pre_computed_data);
-
-        // var options = {
-        //   title: 'Month vs. No comparison',
-        //   hAxis: {title: 'Month' },//, minValue: 0, maxValue: 15},
-        //   vAxis: {title: 'NO'},//, minValue: 0, maxValue: 15},
-        //   legend: 'none'
-        // };
-
-        // var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
-
-        // chart.draw(data, options);
       }
 
     </script>
@@ -348,8 +394,6 @@
           return;
         }
 
-        //console.log("Selected file: " + file);
-
         // replace the inner contents of the element "title"
         $("#title").html("Fetching information...");
         // replace the inner contents of the element "subtitle"
@@ -360,31 +404,34 @@
           url: "xml_generator.php?fname=" + file,
           type: "POST",
           success: function(data) {
-            //console.log("Success: " + data);
-
             // update selection query data
             update_selection_query(data);
-
           },
-          error: function(data) {
+          error: function(data) 
+          {
+            // console log why we failed to get data
             console.log("Error: " + data);
+
+            // replace the inner contents of the element "title"
+            $("#title").html("ERROR: Failed to get data");
+            // replace the inner contents of the element "subtitle"
+            $("#subtitle").html("Error message: " + data);
           }
         });
 
       }
 
-      // on change of select year
+      // on change of select year and time
       document.getElementById("year").addEventListener("change", traverse_and_fetch_records);
-
-      // on change of select time
       document.getElementById("time").addEventListener("change", traverse_and_fetch_records);
-
-      
-
 
     </script>
 
+    <!-- scatter chart -->
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
+
+    <!-- line chart -->
+    <div id="chart_div2" style="width: 900px; height: 500px;"></div>
 
   </body>
 </html>
