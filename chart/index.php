@@ -106,6 +106,7 @@
         // for all of the data
         for(var i = 0; i < data.length; i++)
         {
+          console.log(current_month)
           if(data[i][0] == current_month)
           {
             sum += data[i][1];
@@ -126,6 +127,14 @@
             sum += data[i][1];
             count += 1;
 
+          }
+
+          // if last element in the data well then calculate it
+          if (i == data.length - 1)
+          {
+            current_month_average = sum / count;
+            calculated_data.push([current_month, current_month_average]);
+            console.log(current_month_average, months[current_month], sum, count);
           }
         }
 
@@ -205,6 +214,11 @@
         {
           // fetch time stamp attribute
           var timestamp = records[i].getAttribute("ts");
+
+          if (timestamp == "1450598400")
+          {
+            console.log("FOUND IT: " + timestamp);
+          }
 
           // convert time stamp into date, make sure its parsed as int
           var date = new Date(parseFloat(timestamp) * 1000); // javascript handles in ms not s
