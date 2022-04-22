@@ -20,13 +20,147 @@
     <script type="text/javascript">
       google.charts.load('current', {'packages':['corechart']});
       
-      //google.charts.setOnLoadCallback(drawChart);
+      var records = null;
 
-      function drawChart(data) 
+      function toMonthName(monthNumber) {
+        const date = new Date();
+        date.setMonth(monthNumber - 1);
+
+        return date.toLocaleString('en-US', {
+          month: 'long',
+        });
+      }
+
+      //google.charts.setOnLoadCallback(update_selection_query);
+      function traverse_and_fetch_records()
+      {
+
+        if(records == null)
+        {
+          alert("Please select a file to view");
+          return;
+        }
+
+        var year = document.getElementById("year").value;
+        var time = document.getElementById("time").value;
+        
+        //console.log(year, time)
+
+        // get the last selected month
+        var last_month = 0;
+        var data = []; // empty array to store the data
+        var current_month_average = 0;
+
+        // for every records
+        for(var i = 0; i < records.length; i++)
+        {
+          // fetch time stamp attribute
+          var timestamp = records[i].getAttribute("ts");
+
+          // convert time stamp into date, make sure its parsed as int
+          var date = new Date(parseFloat(timestamp) * 1000); // javascript handles in ms not s
+
+          // check if the date and hours match selected year and time
+          if(date.getFullYear() == year && date.getHours() == time)
+          {
+            // fetch carbon monoxide value
+            var value = records[i].getAttribute("no");
+
+            // average a list of values to the month changes
+            var month = date.getMonth();
+          
+            // append the month number with value
+            data.push([parseInt(month), parseFloat(value)]);
+          }
+          
+        }
+        // sort the data by month number lowest to high
+        data.sort(function(a, b) {
+          return a[0] - b[0];
+        });
+        
+        //console.log(data);
+
+        var calculated_data = [];
+
+        // for all the data calculate each months average and append to the calculated_data array
+        for(var i = 0; i < data.length; i++)
+        {
+          // if the month is different from the last month
+          if(data[i][0] != last_month)
+          {
+            // if the last month is not 0
+            if(last_month != 0)
+            {
+              // calculate the average of the last month
+              var average = current_month_average / i;
+
+              //console.log(i, current_month_average, average);
+
+              // append the average to the calculated_data array
+              calculated_data.push([last_month, average]);
+            }
+
+            // reset the current month average
+            current_month_average = 0;
+          }
+
+          // add the value to the current month average
+          current_month_average += data[i][1];
+
+          // set the last month to the current month
+          last_month = data[i][0];
+        }
+
+        //console.log(calculated_data);
+
+        // insert an empty array into calculated_data array at the start
+        //calculated_data.unshift(["Month", "Average NO"]);
+
+        data_array = [
+          
+            ["Month", "NO"],
+          
+        ]
+
+        
+        // for every calculated_data push into data_array
+        // NOTE: if the charts are displaying the wrong data, it might be because OF THIS FUNCTION
+        // WARNING
+        // WARNING
+        // WARNING
+        // WARNING
+        // WARNING
+        for(var i = 1; i < 13; i++)
+        {
+          //check if calculated_data has the month
+          if(calculated_data[i-1] != undefined)
+          {
+            //console.log(calculated_data[i][0], toMonthName(calculated_data[i][0]));
+            data_array.push([toMonthName(calculated_data[i-1][0]), calculated_data[i-1][1]]);
+          }
+          else
+          {
+            // append an empty array to the data_array
+            data_array.push([toMonthName(i), 0]);
+          }
+        }
+
+        // draw the chart
+        draw_chart(
+          data_array
+        );
+
+      }
+
+      function update_selection_query(data) 
       {
 
         // data is an xml document object
         var xml = data;
+
+        // set active xml to the xml document
+        active_xml = xml;
 
         var root = xml.getElementsByTagName("station")[0]; // get the root of the xml document
         var station_name = root.getAttribute("name"); // get the name of the station
@@ -43,7 +177,7 @@
         // generate a list of years from unix time stamp from elements inside the root xml element
         var dates = []; // stores dates
         var times = []; // stores times
-        var records = root.getElementsByTagName("rec"); // get all records under the root
+        records = root.getElementsByTagName("rec"); // get all records under the root
 
         // clear the element with id years of options
         $("#year").html("");
@@ -102,65 +236,51 @@
           }
         }
 
-        console.log(dates);
-        console.log(times);
-      
-        // extract year from unix timestamp
+        //console.log(dates);
+        //console.log(times);
 
+        // fetch time information
+        traverse_and_fetch_records();
+      }
 
-        // 2: A line chart showing levels in any 24 hour period on any day (user selectable) for any of the six stations (user selectable) for any of the major pollutants (nox, no, no2) in the date range downloaded.
+      function draw_chart(pre_computed_data)
+      {
 
-        // print the station name and geo location
-        // document.write("<h1>" + station_name + "</h1>");
-        // document.write("<h2>" + station_geo + "</h2>");
+        google.charts.load('current', {
+          packages: ['corechart'],
+          language: 'nl'
+        }).then(function () {
 
-        // // print the first child of the root
-        // //console.log(root.childNodes[0]);
-      
-        // // using jquery xpath get all the rec nodes that have the time at 8AM
-        // var rec_nodes = $(xml).find("rec[time='8:00:00']");
+          var data = google.visualization.arrayToDataTable(pre_computed_data);
 
-        // console.log(rec_nodes);
+          var formatMonth = new google.visualization.DateFormat({
+            pattern: 'MMM yyyy'
+          });
+          formatMonth.format(data, 0);
 
-        // var data = google.visualization.arrayToDataTable([
-        //   ['Time', 'Nox'],
+          /// https://developers.google.com/chart/interactive/docs/points
+          var options = {
+            'title':'Average Carbon Monoxide (NO) per month',
+            'titleTextStyle': { 'fontSize': 11 },
+            'width':640,
+            'height':240,
+            'legend': { 'position':'bottom' },
+            vAxis: {title: 'Carbon Monoxide', minValue: 0, maxValue: 10},
+            'series': {"0":{"color":"66aabb"},"1":{"color":"66ddee"},"3":{"color":"e8f8ff"},"2":{"color":"bbeeff"}},
+            'chartArea': { 'width': '90%', 'left': 60, 'right': 20 },
+            'bar': { 'groupWidth': '80%' },
+            'isStacked':true
+          };
+          var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+          chart.draw(data, options);
+        });
 
-        //   <?php
-        //     // $i = 0;
-        //     // foreach ($xml_data->children() as $child) {
-
-        //     //   if ($i > 200)
-        //     //   {
-        //     //     break;
-        //     //   }
-
-        //     //   $i = $i + 1;
-
-
-        //     //   // convert $child->attributes()->ts to int
-        //     //   $ts = intval($child->attributes()->ts);
-        //     //   // convert unix time to human readable time
-        //     //   $time = date("Y-m-d H:i:s", $ts );
-
-        //     //   // echo nox value from xml children
-        //     //   echo "['" . $time . "', " . $child->attributes()->nox . "],\n";
-
-        //     //   // echo "['" . $child->getName() . "', " . $child->attributes()->value . "],";
-        //     // }
-        //   ?>
-
-        //   // [ 8,      12],
-        //   // [ 4,      5.5],
-        //   // [ 11,     14],
-        //   // [ 4,      5],
-        //   // [ 3,      3.5],
-        //   // [ 6.5,    7]
-        // ]);
+        // var data = google.visualization.arrayToDataTable(pre_computed_data);
 
         // var options = {
-        //   title: 'Time vs. Nox comparison',
-        //   hAxis: {title: 'TS'},//, minValue: 0, maxValue: 15},
-        //   vAxis: {title: 'NOX'},//, minValue: 0, maxValue: 15},
+        //   title: 'Month vs. No comparison',
+        //   hAxis: {title: 'Month' },//, minValue: 0, maxValue: 15},
+        //   vAxis: {title: 'NO'},//, minValue: 0, maxValue: 15},
         //   legend: 'none'
         // };
 
@@ -168,6 +288,7 @@
 
         // chart.draw(data, options);
       }
+
     </script>
   </head>
   <body>
@@ -214,6 +335,7 @@
     <script>
       // on change of the file select
       document.getElementById("file").onchange = function() {
+        
         // get the selected file
         var file = document.getElementById("file").value;
 
@@ -226,7 +348,7 @@
           return;
         }
 
-        console.log("Selected file: " + file);
+        //console.log("Selected file: " + file);
 
         // replace the inner contents of the element "title"
         $("#title").html("Fetching information...");
@@ -238,10 +360,10 @@
           url: "xml_generator.php?fname=" + file,
           type: "POST",
           success: function(data) {
-            console.log("Success: " + data);
+            //console.log("Success: " + data);
 
-            // invoke draw chart but pass in the data which is an xml document object
-            drawChart(data);
+            // update selection query data
+            update_selection_query(data);
 
           },
           error: function(data) {
@@ -250,6 +372,16 @@
         });
 
       }
+
+      // on change of select year
+      document.getElementById("year").addEventListener("change", traverse_and_fetch_records);
+
+      // on change of select time
+      document.getElementById("time").addEventListener("change", traverse_and_fetch_records);
+
+      
+
+
     </script>
 
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
