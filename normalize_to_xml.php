@@ -77,24 +77,28 @@
             }
             else // for every other line than the first
             {
-                // start a new element rec
-                $writer->startElement('rec');
+                // only write the record if it contains the required indexes
+                if ( ( !empty(trim($columns[2])) || !empty(trim($columns[11])) ) && ( !empty(trim($columns[3])) ) )
+                {
+                    // start a new element rec
+                    $writer->startElement('rec');
 
-                // for loop that iterates between 2nd and the 13th column
-                for ($j = 1; $j < 14; $j++) {
+                    // for loop that iterates between 2nd and the 13th column
+                    for ($j = 1; $j < 14; $j++) {
 
-                    // if the column is empty, skip it
-                    if (empty(trim($columns[$j]))) 
-                    {
-                        continue;
+                        // if the column is empty, skip it
+                        if (empty(trim($columns[$j]))) 
+                        {
+                            continue;
+                        }
+
+                        // automatically write attribute with their assigned header name and associated value
+                        $writer->writeAttribute(strtolower($header[$j]), $columns[$j]);
                     }
-
-                    // automatically write attribute with their assigned header name and associated value
-                    $writer->writeAttribute(strtolower($header[$j]), $columns[$j]);
+        
+                    // close the element
+                    $writer->endElement();
                 }
-    
-                // close the element
-                $writer->endElement();
             }
         }
 

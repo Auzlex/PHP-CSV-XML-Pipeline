@@ -48,6 +48,7 @@ table, th, td {
     // if a record does not contain these indexes, then it is skipped
     $index_validator_a = 2;
     $index_validator_b = 11;
+    //$index_validator_c = 3;
 
     // the target indexes we want to extract site ID from the CSV
     $index_site_id_key = 4;
