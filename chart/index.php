@@ -15,6 +15,14 @@
 ?>
 <html>
   <head>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <!-- import css -->
+    <link rel="stylesheet" href="css/main.css">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -168,6 +176,7 @@
 
       function traverse_and_fetch_pollutant_records()
       {
+        //
         if(records == null)
         {
           alert("Please select a file to view");
@@ -179,7 +188,85 @@
         var no = document.getElementById("no").checked;
         var no2 = document.getElementById("no2").checked;
 
+        // get the date value selection_date
+        var selection_date = document.getElementById("selection_date").value;
 
+        // output all the values console.log
+        console.log(nox, no, no2, selection_date);
+
+        // check if selection_date is empty
+        if(selection_date == "")
+        {
+          return;
+        }
+
+        // convert the selection date string into date
+        var converted_date = new Date(selection_date);
+
+        var searched_data = [];
+
+        // for every record
+        for(var i = 0; i < records.length; i++)
+        {
+          // fetch time stamp attribute
+          var timestamp = records[i].getAttribute("ts");
+
+          // convert time stamp into date, make sure its parsed as int
+          var date = new Date(parseFloat(timestamp) * 1000); // javascript handles in ms not s
+
+          // check if the date and hours match selected year and time
+          if(date.getFullYear() == converted_date.getFullYear() && date.getMonth() == converted_date.getMonth() && date.getDate() == converted_date.getDate())
+          {
+
+            var temp_array = [];
+
+            // include the record if the checkbox is checked
+            if(nox)
+            {
+              // push nox into temp_array
+              temp_array.push(parseFloat(records[i].getAttribute("nox")));
+            }
+
+            if(no)
+            {
+              // push nox into temp_array
+              temp_array.push(parseFloat(records[i].getAttribute("no")));
+            }
+
+            if(no2)
+            {
+              // push nox into temp_array
+              temp_array.push(parseFloat(records[i].getAttribute("no2")));
+            }
+
+            // push the temp_array into searched_data
+            searched_data.push(temp_array);
+
+          } 
+        }
+
+        // a line chart
+        // selectable pollutants NOX, NO, NO2 only (by user)
+        // shows 24 hours of data for selected day (by user)
+        // from desired listening station
+        // display for every hour get pollution of type NOX, NO, NO2
+
+        console.log(searched_data);
+
+        var data_array = [
+          
+          ["Month", "NO"],
+        
+        ]
+
+        var temp_array = [];
+
+        
+
+        // draw the chart
+        draw_line_chart(
+          searched_data
+        );
 
       }
 
@@ -302,11 +389,7 @@
         traverse_and_fetch_carbon_monoxide_records();
 
 
-        // a line chart
-        // selectable pollutants NOX, NO, NO2 only (by user)
-        // shows 24 hours of data for selected day (by user)
-        // from desired listening station
-        // display for every hour get pollution of type NOX, NO, NO2
+       
 
 
 
@@ -500,6 +583,8 @@
       document.getElementById("no").addEventListener("change", traverse_and_fetch_pollutant_records);
       document.getElementById("no2").addEventListener("change", traverse_and_fetch_pollutant_records);
 
+      // on change of the date
+      document.getElementById("selection_date").addEventListener("change", traverse_and_fetch_pollutant_records);
 
     </script>
 

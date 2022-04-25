@@ -1,0 +1,150 @@
+
+/* 
+    core styles 
+*/
+body {
+    /* remove the margins for the main element to center the page */
+    margin: 0px 5% 0px 5%;
+    padding: 0px 0px 0px 0px;
+
+    font-family: 'Roboto', sans-serif;
+
+    --primary-color: rgb( 25, 25, 25 );
+    --secondary-color: rgb(240,240,240);
+    --tertiary-color: rgb(45,45,45);
+    --quaternary-color: rgb(230,230,230);
+
+    background-color: var(--secondary-color);
+
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+footer {
+    padding: 5px;
+    text-transform: uppercase;
+    color: white;
+    background-color: var(--primary-color);
+    text-align: center;
+
+    /* align the footer always at the bottom of the page fixed */
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+
+    z-index: 1;
+}
+
+/* 
+    Scrollbar
+*/
+
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: var(--primary-color) ; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--tertiary-color); 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}
+
+/* 
+    Navigation Bar Related Styles
+*/
+
+/* Add a black background color to the top navigation */
+.topnav {
+    background-color: var(--primary-color);
+    overflow: hidden;
+    height: 50px;
+
+    /* make sure nav bar is fixed at the top */
+    position: fixed;
+    top: 0px;
+    width: 100%;
+    z-index: 1;
+}
+
+/* Style the links inside the navigation bar */
+.topnav a {
+  float: left;
+  color: var(--secondary-color);
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+    height: 100%;
+  text-transform: lowercase;
+  font-variant: small-caps;
+   
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+  background-color: var(--tertiary-color);
+  color: var(--secondary-color);
+}
+
+/* Add a color to the active/current link */
+.topnav a.active {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+/* Right-aligned section inside the top navigation */
+.topnav-right {
+  float: right;
+  height: 100%;
+}
+
+.navbar-brand {
+  float: left;
+  color: var(--secondary-color);
+  text-align: center;
+  line-height: 50px;
+  padding-left: 15px;
+  padding-right: 15px;
+  text-decoration: none;
+  font-size: 2em;
+
+  overflow: hidden;
+  text-transform: lowercase;
+  font-variant: small-caps;
+}
+
+/* 
+    Form style
+*/
+input[type=text], input[type=number], input[type=email], input[type=date], select {
+    width: auto;
+    padding: 12px 20px;
+    /*margin: 8px 0;*/
+    display: inline-block;
+    border: 1px solid #ccc;
+    /* border-radius: 4px; */
+    box-sizing: border-box;
+}
+
+input[type=button], input[type=submit], input[type=reset] {
+    /* background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    padding: 16px 32px;
+    text-decoration: none;
+    margin: 4px 2px;
+    cursor: pointer;
+    text-transform: lowercase;
+    font-variant: small-caps; */
+    display: contents;
+}
