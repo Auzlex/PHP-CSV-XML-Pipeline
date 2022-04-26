@@ -27,6 +27,8 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
 
+      // TODO: Restrict the years
+
       var xml = null;
       var records = null;
 
@@ -200,6 +202,12 @@
           return;
         }
 
+        // if none of them are selected return
+        if(!nox && !no && !no2)
+        {
+          return;
+        }
+
         // convert the selection date string into date
         var converted_date = new Date(selection_date);
 
@@ -219,6 +227,18 @@
           {
 
             var temp_array = [];
+
+            // // a loop x between 0 and 23 to find the hours
+            // for(var x = 0; x < 24; x++)
+            // {
+            //   // check if the 
+            // }
+            // TODO: it seems the code already fetches 23 hours of data anyway with the given conditions above
+            // but if it is glitched then I will need to make it check for the hours
+
+
+            // get the hour of the record plus 1 to offset as java counts 0-23
+            temp_array.push(date.getHours() + 1);
 
             // include the record if the checkbox is checked
             if(nox)
@@ -245,27 +265,59 @@
           } 
         }
 
+        // sort the searched_data by first index (hours)
+        searched_data.sort(function(a, b) {
+          return a[0] - b[0];
+        });
+
         // a line chart
         // selectable pollutants NOX, NO, NO2 only (by user)
         // shows 24 hours of data for selected day (by user)
         // from desired listening station
         // display for every hour get pollution of type NOX, NO, NO2
 
-        console.log(searched_data);
+        //console.log(searched_data);
 
         var data_array = [
-          
-          ["Month", "NO"],
-        
+  
         ]
 
-        var temp_array = [];
+        var data_types = ["hour"];
 
-        
+        // include the record if the checkbox is checked
+        if(nox)
+        {
+          // push nox into temp_array
+          data_types.push("nox");
+        }
+
+        if(no)
+        {
+          // push nox into temp_array
+          data_types.push("no");
+        }
+
+        if(no2)
+        {
+          // push nox into temp_array
+          data_types.push("no2");
+        }
+
+        // push temp_array into data_array
+        data_array.push(data_types);
+
+        // for every element in searched_data push into data_array
+        for(var i = 0; i < searched_data.length; i++)
+        {
+          data_array.push(searched_data[i]);
+        }
+
+        // merge searched_data into data_array
+        //data_array.concat(searched_data);
 
         // draw the chart
         draw_line_chart(
-          searched_data
+          data_array
         );
 
       }
@@ -299,6 +351,17 @@
 
         // clear the element with id time of options
         $("#time").html("");
+
+        // reset selection date value to nothing
+        document.getElementById("selection_date").value = "";
+
+        // reset the checkboxes to false
+        document.getElementById("nox").checked = false;
+        document.getElementById("no").checked = false;
+        document.getElementById("no2").checked = false;
+
+        // reset chart_div2 to be empty html
+        $("#chart_div2").html("");
 
         // for every records
         for(var i = 0; i < records.length; i++)
@@ -442,13 +505,55 @@
 
       function draw_line_chart(pre_computed_data)
       {
+        console.log(pre_computed_data)
 
+        // load google charts
+        google.charts.load('current', {
+          packages: ['corechart'],
+          language: 'nl'
+        }).then(function () {
+
+          // format data for google charts
+          var data = google.visualization.arrayToDataTable(pre_computed_data);
+
+          // format month
+          var formatMonth = new google.visualization.DateFormat({
+            pattern: 'MMM yyyy'
+          });
+
+          formatMonth.format(data, 0);
+
+          /// https://developers.google.com/chart/interactive/docs/points
+          // options for the chart
+          var options = {
+            'title':'Major Pollutants (NOX, NO, NO2) per hour for selected day',
+            'titleTextStyle': { 'fontSize': 11 },
+            'width':640,
+            'height':240,
+            'legend': { 'position':'bottom' },
+            hAxis: {
+              title:"Hour Of Day",
+              // array from 0 to 23
+              ticks: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+            },
+            vAxis: {title: 'Pollutant Intensity', minValue: 0},
+            'series': {"0":{"color":"66aabb"},"1":{"color":"66ddee"},"3":{"color":"e8f8ff"},"2":{"color":"bbeeff"}},
+            'chartArea': { 'width': '90%', 'left': 60, 'right': 20 },
+            'bar': { 'groupWidth': '80%' },
+            'isStacked':true
+          };
+
+          // generate scatter chart
+          var chart = new google.visualization.LineChart(document.getElementById('chart_div2'));
+          chart.draw(data, options);
+        });
       }
 
 
     </script>
   </head>
   <body>
+
     <label for="fname">Selection Station:</label>
     <select name="files" id="file">
       <option id='loading_tick' value='none'>Validating XML files. Please Wait.</option>
@@ -491,6 +596,12 @@
     </select>
       
     </br>
+  
+    <!-- title and subtitle of station -->
+    <h2 id="title" style="margin-bottom: 0px;"></h2>
+    <h4 id="subtitle" style="margin-bottom: 0px; margin-top: 0px;"></h4>
+
+
     </br>
 
     <!-- SELECTION YEAR -->
@@ -503,13 +614,8 @@
     <select name="times" id="time">
     </select>
 
-    <!-- title and subtitle of station -->
-    </br>
-    <h2 id="title" style="margin-bottom: 0px;"></h2>
-    <h3 id="subtitle" style="margin-bottom: 0px; margin-top: 0px;"></h3>
-
     <!-- scatter chart -->
-    <div id="chart_div" style="width: 900px; height: 250px;"></div>
+    <div id="chart_div" style="width: 900px; height: 250px;  margin-top: 10px;"></div>
 
     <!-- date selection -->
     <label for="date">Select Day:</label>
@@ -528,7 +634,7 @@
     <label for="no2">NO2</label>
 
     <!-- line chart -->
-    <div id="chart_div2" style="width: 900px; height: 250px;"></div>
+    <div id="chart_div2" style="width: 900px; height: 250px;  margin-top: 10px;"></div>
 
     <!-- SELECTION javascript -->
     <script>
