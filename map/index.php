@@ -1,598 +1,483 @@
-
-<?php 
-
-//date_default_timezone_get("GMT");
-ini_set('memory_limit', '512M');
-ini_set('max_execution_time', 300);
-ini_set('auto_detect_line_endings', true);
-
-// get the root of the website
-$root = $_SERVER['DOCUMENT_ROOT'];
-
-// look in the root directory of this script and find files with data-*.xml
-$files = glob($root . "/data-*.xml");
-
-?>
+<!-- <!DOCTYPE html> -->
 <html>
 <head>
+
+  <!-- import css -->
+  <link rel="stylesheet" href="css/main.css">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
-  <!-- import css -->
-  <link rel="stylesheet" href="css/main.css">
 
-  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script type="text/javascript">
-
-    // TODO: Restrict the years
-
-    var xml = null;
-    var records = null;
-
-    function find_month_in_calculated_data(calculated_data, current_month)
-    {
-      for(var i = 0; i < calculated_data.length; i++)
-      {
-        if(calculated_data[i][0] == current_month)
-        {
-          return calculated_data[i];
-        }
-      }
-
-      return -1;
-    }
-
-    function traverse_and_fetch_carbon_monoxide_records()
-    {
-
-      if(records == null)
-      {
-        alert("Please select a file to view");
-        return;
-      }
-
-      var year = document.getElementById("year").value;
-      var time = document.getElementById("time").value;
-
-      //console.log(year, time);
-      
-      // get the last selected month
-      var last_month = 0;
-      var data = []; // empty array to store the data
-      var current_month_average = 0;
-
-      // for every records
-      for(var i = 0; i < records.length; i++)
-      {
-        // fetch time stamp attribute
-        var timestamp = records[i].getAttribute("ts");
-
-        // convert time stamp into date, make sure its parsed as int
-        var date = new Date(parseFloat(timestamp) * 1000); // javascript handles in ms not s
-
-        // check if the date and hours match selected year and time
-        if(date.getFullYear() == year && date.getHours() == time)
-        {
-          
-          // fetch carbon monoxide value
-          var value = records[i].getAttribute("no");
-
-          // average a list of values to the month changes
-          var month = date.getMonth();
-        
-          // append the month number with value
-          data.push([parseInt(month), parseFloat(value), timestamp]);
-        }
-        
-      }
-      // sort the data by month number lowest to high
-      data.sort(function(a, b) {
-        return a[0] - b[0];
-      });
-
-      //console.log(data);
-
-      var calculated_data = [];
-
-      sum = 0;
-      count = 0;
-
-      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-      current_month = 0;
-      // for all of the data
-      for(var i = 0; i < data.length; i++)
-      {
-        //console.log(current_month)
-        if(data[i][0] == current_month)
-        {
-          sum += data[i][1];
-          count += 1;
-        }
-        else if( data[i][0] != current_month )
-        {
-          // calculate average
-          current_month_average = sum / count;
-          calculated_data.push([current_month, current_month_average]);
-          //console.log(current_month_average, months[current_month], sum, count);
-          
-          sum = 0;
-          count = 0;
-          
-          current_month = data[i][0];
-
-          sum += data[i][1];
-          count += 1;
-
-        }
-
-        // if last element in the data well then calculate it
-        if (i == data.length - 1)
-        {
-          current_month_average = sum / count;
-          calculated_data.push([current_month, current_month_average]);
-          //console.log(current_month_average, months[current_month], sum, count);
-        }
-      }
-
-      //console.log(calculated_data);
-
-      data_array = [
-        
-          ["Month", "NO"],
-        
-      ]
-
-      // for every calculated_data push into data_array
-      // NOTE: if the charts are displaying the wrong data, it might be because OF THIS FUNCTION
-      // WARNING
-      // WARNING
-      // WARNING
-      // WARNING
-      // WARNING
-      for(var i = 0; i < 12; i++)
-      {
-        var data = find_month_in_calculated_data(calculated_data, i)
-
-        //check if calculated_data has the month
-        if(data != -1)
-        {
-          data_array.push([months[data[0]], data[1]]);
-        }
-        else
-        {
-          // append an empty array to the data_array
-          data_array.push([ months[i], 0 ]);
-        }
-      }
-
-      // draw the chart
-      draw_scatter_chart(
-        data_array
-      );
-
-    }
-
-    function traverse_and_fetch_pollutant_records()
-    {
-      //
-      if(records == null)
-      {
-        alert("Please select a file to view");
-        return;
-      }
-
-      // get the values of the checkboxes nox, no, no2 as boolean
-      var nox = document.getElementById("nox").checked;
-      var no = document.getElementById("no").checked;
-      var no2 = document.getElementById("no2").checked;
-
-      // get the date value selection_date
-      var selection_date = document.getElementById("selection_date").value;
-
-      // output all the values console.log
-      console.log(nox, no, no2, selection_date);
-
-      // check if selection_date is empty
-      if(selection_date == "")
-      {
-        return;
-      }
-
-      // if none of them are selected return
-      if(!nox && !no && !no2)
-      {
-        return;
-      }
-
-      // convert the selection date string into date
-      var converted_date = new Date(selection_date);
-
-      var searched_data = [];
-
-      // for every record
-      for(var i = 0; i < records.length; i++)
-      {
-        // fetch time stamp attribute
-        var timestamp = records[i].getAttribute("ts");
-
-        // convert time stamp into date, make sure its parsed as int
-        var date = new Date(parseFloat(timestamp) * 1000); // javascript handles in ms not s
-
-        // check if the date and hours match selected year and time
-        if(date.getFullYear() == converted_date.getFullYear() && date.getMonth() == converted_date.getMonth() && date.getDate() == converted_date.getDate())
-        {
-
-          var temp_array = [];
-
-          // // a loop x between 0 and 23 to find the hours
-          // for(var x = 0; x < 24; x++)
-          // {
-          //   // check if the 
-          // }
-          // TODO: it seems the code already fetches 23 hours of data anyway with the given conditions above
-          // but if it is glitched then I will need to make it check for the hours
-
-
-          // get the hour of the record plus 1 to offset as java counts 0-23
-          temp_array.push(date.getHours() + 1);
-
-          // include the record if the checkbox is checked
-          if(nox)
-          {
-            // push nox into temp_array
-            temp_array.push(parseFloat(records[i].getAttribute("nox")));
-          }
-
-          if(no)
-          {
-            // push nox into temp_array
-            temp_array.push(parseFloat(records[i].getAttribute("no")));
-          }
-
-          if(no2)
-          {
-            // push nox into temp_array
-            temp_array.push(parseFloat(records[i].getAttribute("no2")));
-          }
-
-          // push the temp_array into searched_data
-          searched_data.push(temp_array);
-
-        } 
-      }
-
-      // sort the searched_data by first index (hours)
-      searched_data.sort(function(a, b) {
-        return a[0] - b[0];
-      });
-
-      // a line chart
-      // selectable pollutants NOX, NO, NO2 only (by user)
-      // shows 24 hours of data for selected day (by user)
-      // from desired listening station
-      // display for every hour get pollution of type NOX, NO, NO2
-
-      //console.log(searched_data);
-
-      var data_array = [
-
-      ]
-
-      var data_types = ["hour"];
-
-      // include the record if the checkbox is checked
-      if(nox)
-      {
-        // push nox into temp_array
-        data_types.push("nox");
-      }
-
-      if(no)
-      {
-        // push nox into temp_array
-        data_types.push("no");
-      }
-
-      if(no2)
-      {
-        // push nox into temp_array
-        data_types.push("no2");
-      }
-
-      // push temp_array into data_array
-      data_array.push(data_types);
-
-      // for every element in searched_data push into data_array
-      for(var i = 0; i < searched_data.length; i++)
-      {
-        data_array.push(searched_data[i]);
-      }
-
-      // merge searched_data into data_array
-      //data_array.concat(searched_data);
-
-      // draw the chart
-      draw_line_chart(
-        data_array
-      );
-
-    }
-
-    function update_selection_query(data) 
-    {
-
-      // data is an xml document object
-      xml = data;
-
-      var root = xml.getElementsByTagName("station")[0]; // get the root of the xml document
-      var station_name = root.getAttribute("name"); // get the name of the station
-      var station_geo = root.getAttribute("geocode"); // get the geo location of the station
-
-      $("#title").html(station_name); // replace the inner contents of the element "title"
-      $("#subtitle").html("Location GPS: " + station_geo); // replace the inner contents of the element "subtitle"
-
-      // TODO: We need to generate 2 charts
-      // 1: A scatter chart to show a years worth of data (averaged by month) 
-      // from a specific station 
-      // for Carbon Monoxide (NO) at a certain time of day - say 08.00 hours.
-
-      // generate a list of years from unix time stamp from elements inside the root xml element
-      var dates = []; // stores dates
-      var times = []; // stores times
-      var fulldates = []; // stores full date
-      records = root.getElementsByTagName("rec"); // get all records under the root
-
-      // clear the element with id years of options
-      $("#year").html("");
-
-      // clear the element with id time of options
-      $("#time").html("");
-
-      // reset selection date value to nothing
-      document.getElementById("selection_date").value = "";
-
-      // reset the checkboxes to false
-      document.getElementById("nox").checked = false;
-      document.getElementById("no").checked = false;
-      document.getElementById("no2").checked = false;
-
-      // reset chart_div2 to be empty html
-      $("#chart_div2").html("");
-
-      // for every records
-      for(var i = 0; i < records.length; i++)
-      {
-        // fetch time stamp attribute
-        var timestamp = records[i].getAttribute("ts");
-
-        // convert time stamp into date, make sure its parsed as int
-        var date = new Date(parseFloat(timestamp) * 1000); // javascript handles in ms not s
-
-        // check if the date already exists in dates array
-        if(dates.indexOf(date.getFullYear()) == -1)
-        {
-          // if not, add it to the dates array
-          dates.push(date.getFullYear());
-        }
-        
-        // check if the time already exists in times array
-        if(times.indexOf(date.getHours()) == -1)
-        {
-          // if not, add it to the times array
-          times.push(date.getHours());
-        }
-
-        var month = date.getMonth();
-        var day = date.getDate();
-
-        if(month < 10)
-            month = '0' + (month + 1).toString();
-        if(day < 10)
-            day = '0' + day.toString();
-
-        var dateformat = date.getFullYear() + "-" + month + "-" + day;
-
-
-        // check if the full date already exists in fulldates array
-        if(fulldates.indexOf(dateformat) == -1)
-        {
-          // if not, add it to the fulldates array
-          fulldates.push(dateformat);
-        }
-      }
-
-      // sort the years highest to lowest
-      dates.sort(function(a, b){return b-a});
-
-      // sort the times lowest to highest
-      times.sort(function(a, b){return a-b});
-
-      // sort the dates
-      fulldates.sort(function(a, b) {
-          var c = new Date(a);
-          var d = new Date(b);
-          return c-d;
-      });
-
-      // for every year
-      for(var i = 0; i < dates.length; i++)
-      {
-        // add an option to the element with id years of options
-        $("#year").append("<option value='" + dates[i] + "'>" + dates[i] + "</option>");
-      }
-
-      // for every time
-      for(var i = 0; i < times.length; i++)
-      {
-        // add an option to the element with id time of options
-        if ((times[i]).toString().length == 1 ) {
-          $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + "0"+times[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
-        }
-        else
-        {
-
-          $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + times[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
-        }
-      }
-
-      // adjust the input date to min max of the dates array
-      $("#selection_date").attr("min", fulldates[0]);
-      $("#selection_date").attr("max", fulldates[fulldates.length - 1]);
-
-      //console.log(fulldates)
-
-      //console.log(dates);
-      //console.log(times);
-
-      // fetch time information
-      traverse_and_fetch_carbon_monoxide_records();
-
-
-     
-
-
-
-
-      // TODO: for maps use open street maps
-
-
-
-    }
-
-  </script>
 </head>
 <body>
-  <label for="fname">Selection Station:</label>
-  <select name="files" id="file">
-    <option id='loading_tick' value='none'>Validating XML files. Please Wait.</option>
-    <?php
 
-      // for each file
-      foreach ($files as &$file_name) {
-
-        // remove the directory from the file name
-        $file_name = str_replace($root . "/", "", $file_name);
-
-        //echo "<option value='" . $file_name . "'>" . $file_name . "</option>";
-
-        // read the xml file 
-        $xml = simplexml_load_file($root . "/" . $file_name);
-
-        // check if the xml actually has data
-        if ($xml) {
-
-          // get the name of the station
-          $station_name = $xml->attributes()->name;
-
-          // get the geo location of the station
-          $station_geo = $xml->attributes()->geocode;
-
-          // remove the extension from the file name
-          $file_name = str_replace(".xml", "", $file_name);
-
-          // remove data- from the file name
-          $file_name = str_replace("data-", "", $file_name);
-
-          // create a html option
-          echo "<option value='$file_name'>$file_name - $station_name</option>";
-        }
-      }
-
-      // echo javascript to rename the loading tick
-      echo "<script>$('#loading_tick').html('--');</script>";
-    ?>
-  </select>
-    
-  </br>
-
-  <h2 id="title" style="margin-bottom: 0px;">Maps WIP</h2>
-  <h3 id="subtitle" style="margin-bottom: 0px; margin-top: 0px;">Do something</h3>
+  <h2 id="title" style="margin-bottom: 0px;">INDEXING ALL STATION RECORDS</h2>
+  <h4 id="subtitle" style="margin-bottom: 0px; margin-top: 0px;">PLEASE WAIT...</h4>
 
   </br>
-  
-  <div id="map" style = "width:800px; height:600px;"></div>
+
+  <div id="pollutant_selection" style="background-color: var(--tertiary-color); padding: 15px; color: var(--secondary-color); display: none;">
+
     
-  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    
+    <!-- SELECTION pollutant -->
+    <label for="nox">View Pollutants:</label>
+
+    <input type="checkbox" id="nox" name="nox" value="nox">
+    <label for="nox">NOX</label>
+
+    <input type="checkbox" id="no" name="no" value="no">
+    <label for="no">NO</label>
+
+    <input type="checkbox" id="no2" name="no2" value="no2">
+    <label for="no2">NO2</label>
+
+    </br></br>
+
+    <!-- SELECTION YEAR -->
+    <label for="fname">Select Year:</label>
+    <select name="years" id="year">
+    </select>
+
+    <!-- SELECTION TIME -->
+    <label for="fname">Select Time:</label>
+    <select name="times" id="time">
+    </select>
+
+    <!-- SELECTION MONTH -->
+    <label for="fname">Select Month:</label>
+    <select name="months" id="month">
+    </select>
+
+    </br>
+
+    <!-- button to fetch data -->
+    <!-- <button id="fetch_data" style="margin-top: 10px;">Update Map</button> -->
+
+  </div>
+
+  </br>
+
+  <div id="map" style="width:100%; height:70%;"></div>
+    
   <!-- SELECTION javascript -->
   <script>
 
     // Creating map options
     var mapOptions = {
     center: [51.4527, -2.5978],
-    zoom: 10
+    zoom: 12
     }
     
     // Creating a map object
     var map = new L.map("map", mapOptions);
     
+    var layerGroup = L.layerGroup().addTo(map);
+
     // Creating a Layer object
-    var layer = new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+    //var layer = new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+    var layer = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+      maxZoom: 20,
+      attribution: '© <a href="https://stadiamaps.com/">Stadia Maps</a>, © <a href="https://openmaptiles.org/">OpenMapTiles</a> © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+    });
     
     // Adding layer to the map
     map.addLayer(layer);
 
-    // // on change of the file select
-    // document.getElementById("file").onchange = function() {
-      
-    //   // get the selected file
-    //   var file = document.getElementById("file").value;
-
-    //   // if the file is not none
-    //   if (file == "none") {
-    //     // replace the inner contents of the element "title"
-    //     $("#title").html("Please select a valid station");
-    //     // replace the inner contents of the element "subtitle"
-    //     $("#subtitle").html("...");
-    //     return;
-    //   }
-
-    //   // replace the inner contents of the element "title"
-    //   $("#title").html("Fetching information...");
-    //   // replace the inner contents of the element "subtitle"
-    //   $("#subtitle").html("Please standby...");
-
-    //   // perform an ajax request to the server
-    //   $.ajax({
-    //     url: "xml_generator.php?fname=" + file,
-    //     type: "POST",
-    //     success: function(data) {
-    //       // update selection query data
-    //       update_selection_query(data);
-    //     },
-    //     error: function(data) 
-    //     {
-    //       // console log why we failed to get data
-    //       console.log("Error: " + data);
-
-    //       // replace the inner contents of the element "title"
-    //       $("#title").html("ERROR: Failed to get data");
-    //       // replace the inner contents of the element "subtitle"
-    //       $("#subtitle").html("Error message: " + data);
-    //     }
-    //   });
-
-    // }
-
-    // // on change of select year and time
-    // document.getElementById("year").addEventListener("change", traverse_and_fetch_carbon_monoxide_records);
-    // document.getElementById("time").addEventListener("change", traverse_and_fetch_carbon_monoxide_records);
-
-    // // on change of select pollutant
-    // document.getElementById("nox").addEventListener("change", traverse_and_fetch_pollutant_records);
-    // document.getElementById("no").addEventListener("change", traverse_and_fetch_pollutant_records);
-    // document.getElementById("no2").addEventListener("change", traverse_and_fetch_pollutant_records);
-
-    // // on change of the date
-    // document.getElementById("selection_date").addEventListener("change", traverse_and_fetch_pollutant_records);
+    // stores all the pollution data
+    var pollutant_data = [];
 
   </script>
 
-    
+  <?php 
+
+  //date_default_timezone_get("GMT");
+  ini_set('memory_limit', '512M');
+  ini_set('max_execution_time', 300);
+  ini_set('auto_detect_line_endings', true);
+
+  // get the root of the website
+  $root = $_SERVER['DOCUMENT_ROOT'];
+
+  // look in the root directory of this script and find files with data-*.xml
+  $files = glob($root . "/data-*.xml");
+
+  $stations_found = 0;
+  $valid_files = array();
+  $ts = null;
+
+  // for each file
+  foreach ($files as &$file_name) {
+
+    // remove the directory from the file name
+    $file_name = str_replace($root . "/", "", $file_name);
+
+    // read the xml file 
+    $xml = simplexml_load_file($root . "/" . $file_name);
+
+    // check if the xml actually has data
+    if ($xml) {
+
+      // get the name of the station
+      $station_name = $xml->attributes()->name;
+
+      // get the geo location of the station
+      $station_geo = $xml->attributes()->geocode;
+
+      // this value will count the dates found
+      $dates_found = 0;
+
+      // check if the dates between the range 2015-01-01 to 2019-12-31
+      $startDate = date('Y-m-d', strtotime("2015-01-01"));
+      $endDate = date('Y-m-d', strtotime("2019-12-31"));
+
+      // perform an xpath that gets data between the specified ranges
+      $valid_records = $xml->xpath("//station/rec[( @ts >= " . strtotime("2015-01-01") . " ) and ( @ts <= " . strtotime("2019-12-31") . " )]");
+
+      // for every valid records
+      foreach ($valid_records as &$valid_record) {
+
+        // get the timestamp
+        $timestamp = $valid_record->attributes()->ts;
+
+        // get the pollutant values
+        $nox = $valid_record->attributes()->nox;
+        $no = $valid_record->attributes()->no;
+        $no2 = $valid_record->attributes()->no2;
+
+        // append to pollutant_data javascript
+        echo "<script>pollutant_data.push([" . $timestamp . ", [" . $station_geo . " ] ," . $nox . "," . $no . "," . $no2 . "]);</script>";
+
+      }
+
+      // $dates_found is greater than zero
+      if(count($valid_records) > 0)
+      {
+        // remove the extension from the file name
+        $file_name = str_replace(".xml", "", $file_name);
+
+        // remove data- from the file name
+        $file_name = str_replace("data-", "", $file_name);
+
+        // append option using javascript via echo
+        echo "<script>
+                $('#file').append('<option value=\"$file_name\">$file_name - $station_name</option>');
+              </script>";
+
+        $stations_found += 1;
         
+        // add file name to valid_files array
+        array_push($valid_files, $file_name);
+
+        // https://stackoverflow.com/questions/34775308/leaflet-how-to-add-a-text-label-to-a-custom-marker-icon
+        // https://github.com/Leaflet/Leaflet.label
+
+        // split $station_geo into lat and long
+        $station_geo_split = explode(",", $station_geo);
+
+        // creates a marker for this station if its valid
+        echo '
+          <script>
+          L.circleMarker([' . floatval( $station_geo_split[0] ) . ', ' . floatval( $station_geo_split[1] ) . '], {radius: 5, color:"#BBBBBB" }).addTo(map).bindTooltip("' . $file_name . " - " .  $station_name .'",{permanent: true, direction: "right"});
+          </script>
+        ';
+
+      }
+
+    }
+  }
+
+  // convert valid_files array to javascript via echo
+  echo "<script>
+          var valid_files = " . json_encode($valid_files) . ";
+        </script>";
+  
+  ?>
+
+  <script>
+
+    // this function is called once to only fetch the selection query drop downs
+    function update_selection_query()
+    {
+    
+      // clear the element with id years of options
+      $("#year").html("");
+
+      // clear the element with id time of options
+      $("#time").html("");
+
+      // array of unique hours
+      var unique_hours = [];
+
+      // array of unique years
+      var unique_years = [];
+
+      // array of unique months
+      var unique_months = [];
+
+      // ts is a list of unix times as ints
+      // for every ts element parse as new Date() and append any unique hours and years to their respective arrays
+      for (var i = 0; i < pollutant_data.length; i++)
+      {
+        // convert the timestamp to a date
+        var ts_date = new Date(pollutant_data[i][0] * 1000);
+
+        // if the date is not between 2015-01-01 to 2019-12-31 continue
+        if ((ts_date < new Date(2015, 1, 1)) || (ts_date > new Date(2019, 12, 31)))
+        {
+          continue;
+        }
+
+        // get the year
+        var ts_year = ts_date.getFullYear();
+
+        // get the hour
+        var ts_hour = ts_date.getHours();
+
+        // get the month
+        var ts_month = ts_date.getMonth();
+
+        // append the time to unique_times
+        if(unique_hours.indexOf(ts_hour) == -1)
+        {
+          unique_hours.push(ts_hour);
+        }
+
+        // append the year to unique_years
+        if(unique_years.indexOf(ts_year) == -1)
+        {
+          unique_years.push(ts_year);
+        }
+
+        // append the month to unique_months
+        if(unique_months.indexOf(ts_month) == -1)
+        {
+          unique_months.push(ts_month);
+        }
+
+      }
+      
+      // sort the years from highest to lowest
+      unique_years.sort(function(a, b){return b-a});
+
+      // sort the times from lowest to highest
+      unique_hours.sort(function(a, b){return a-b});
+
+      // sort the months from lowest to highest
+      unique_months.sort(function(a, b){return a-b});
+
+      // console.log the unique hours and years
+      //console.log(unique_hours);
+      //console.log(unique_years);
+      //console.log(unique_months);
+
+      // for every year
+      for(var i = 0; i < unique_years.length; i++)
+      {
+        // add an option to the element with id years of options
+        $("#year").append("<option value='" + unique_years[i] + "'>" + unique_years[i] + "</option>");
+      }
+
+      // for every time
+      for(var i = 0; i < unique_hours.length; i++)
+      {
+        // add an option to the element with id time of options
+        if ((unique_hours[i]).toString().length == 1 ) {
+          $("#time").append("<option value='" + unique_hours[i] + "'>" + new Date('1970-01-01T' + "0"+unique_hours[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
+        }
+        else
+        {
+
+          $("#time").append("<option value='" + unique_hours[i] + "'>" + new Date('1970-01-01T' + unique_hours[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
+        }
+      }
+
+      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      // for every month
+      for(var i = 0; i < unique_months.length; i++)
+      {
+        // add an option to the element with id months of options
+        $("#month").append("<option value='" + unique_months[i] + "'>" + months[unique_months[i]] + "</option>");
+      }
+
+      $("#title").html("Bristol Pollution Monitoring Stations".toUpperCase());
+      // replace the inner contents of the element "subtitle"
+      $("#subtitle").html("Successfully loaded <?php echo $stations_found; ?> stations records".toUpperCase());
+
+      // check if #pollutant_selection is display none
+      if($("#pollutant_selection").css("display") == "none")
+      {
+        // show the pollutant_selection fade in
+        $("#pollutant_selection").fadeIn(1000);
+      }
+    
+    }
+
+    update_selection_query(); 
+
+    function traverse_and_fetch_pollutant_records()
+    {
+      // get the values of the checkboxes nox, no, no2 as boolean
+      var nox = document.getElementById("nox").checked;
+      var no = document.getElementById("no").checked;
+      var no2 = document.getElementById("no2").checked;
+
+      // grab time and year from the selection query drop downs
+      var time = $("#time").val();
+      var year = $("#year").val();
+      var month = $("#month").val();
+
+      // if none of them are selected return
+      if(!nox && !no && !no2)
+      {
+        alert("Please select pollutants to fetch data from!")
+        return;
+      }
+
+      // remove all the markers in one go
+      layerGroup.clearLayers();
+
+      // disable the fetch button and checkboxes
+      $('#nox').prop('disabled', true);
+      $('#no').prop('disabled', true);
+      $('#no2').prop('disabled', true);
+      $("#year").prop('disabled', true);
+      $("#time").prop('disabled', true);
+      $("#month").prop('disabled', true);
+
+      //console.log(valid_files);
+
+      var ajax_array = [];
+
+      var quarters = [
+          { low: 0, high: 67, colour: "9CFF9C" }, 
+          { low: 86, high: 134, colour: "31FF00" }, 
+          { low: 135, high: 200, colour: "31CF00" }, 
+          { low: 201, high: 267, colour: "FFFF00" },
+          { low: 268, high: 334, colour: "FFCF00" },
+          { low: 335, high: 400, colour: "FF9A00" },
+          { low: 401, high: 467, colour: "FF6464" },
+          { low: 468, high: 534, colour: "FF0000" },
+          { low: 535, high: 600, colour: "990000" },
+          { low: 601, high: Infinity, colour: "CE30FF" },
+      ];
+
+      function find_colour_code(value) {
+        // return the colour code for the pollutant if the value lands between range in the quarters array
+        for (var i = 0; i < quarters.length; i++) {
+          if (value >= quarters[i].low && value <= quarters[i].high) {
+            return quarters[i].colour;
+          }
+        }
+      }
+
+      //console.log(find_colour_code(134))
+
+      // update the html title with records being processed
+      $("#title").html(("Working...").toUpperCase() ); // replace the inner contents of the element "title"
+      $("#subtitle").html("Please standby... filtering records...".toUpperCase() ); // replace the inner contents of the element "subtitle"
+
+      // for every record in the pollutant_data array console.log
+      for (var i = 0; i < pollutant_data.length; i++) 
+      {
+        // 0                    1                     2             3             4
+        //[" . $timestamp . "," . $station_geo . "," . $nox . "," . $no . "," . $no2 . "]
+
+        
+        // convert the date time to a date object
+        var record_date = new Date(parseInt(pollutant_data[i][0]) * 1000);
+
+        //console.log(pollutant_data[i], parseInt(year), parseInt(time), record_date.getFullYear(), record_date.getHours());
+
+        // check if the record_date matches the year and time
+        if(record_date.getFullYear() == parseInt(year) && record_date.getHours() == parseInt(time) && record_date.getMonth() == month )
+        {
+          // if we are looking for nox only records
+          if(nox)
+          {
+            // get the nox value of the record
+            var nox_value = parseFloat(pollutant_data[i][2]);
+
+            // add to the map if the nox is not empty
+            if(nox_value > 0)
+            {
+              // add a circle to the map to show pollution data
+              var circle = L.circle([ pollutant_data[i][1][0],  pollutant_data[i][1][1] ], {radius: nox_value, stroke:false, fillOpacity: 0.1, fillColor: "#" + find_colour_code(nox_value)} ).addTo(layerGroup);//.bindTooltip("NOx: " + nox_value);
+              circle.bindTooltip("NOx: " + nox_value, {permanent: false, offset: [nox_value/2, 0] })
+
+            }
+
+          }
+
+          // if we are looking for nox only records
+          if(no)
+          {
+            // get the nox value of the record
+            var no_value = parseFloat(pollutant_data[i][3]);
+
+            // add to the map if the nox is not empty
+            if(no_value > 0)
+            {
+              var circle = L.circle([ pollutant_data[i][1][0],  pollutant_data[i][1][1] ], {radius: no_value, stroke:false, fillOpacity: 0.1, fillColor: "#" + find_colour_code(no_value)} ).addTo(layerGroup);
+              circle.bindTooltip("NO: " + nox_value, {permanent: false, offset: [no_value/2, 0] })
+            }
+
+          }
+
+          // if we are looking for nox only records
+          if(no2)
+          {
+            // get the nox value of the record
+            var no2_value = parseFloat(pollutant_data[i][4]);
+
+            // add to the map if the nox is not empty
+            if(no2_value > 0)
+            {
+              var circle = L.circle([ pollutant_data[i][1][0],  pollutant_data[i][1][1] ], {radius: no2_value, stroke:false, fillOpacity: 0.1, fillColor: "#" + find_colour_code(no2_value)} ).addTo(layerGroup);
+              circle.bindTooltip("NO2: " + nox_value, {permanent: false, offset: [no2_value/2, 0] })
+            }
+
+          }
+        }
+      }
+
+      // enable the fetch button and checkboxes
+      $('#nox').prop('disabled', false);
+      $('#no').prop('disabled', false);
+      $('#no2').prop('disabled', false);
+      $("#year").prop('disabled', false);
+      $("#time").prop('disabled', false);
+      $("#month").prop('disabled', false);
+
+    }
+
+    function update_map()
+    {
+      traverse_and_fetch_pollutant_records();
+    }
+
+
+    // on change of select year and time
+    document.getElementById("year").addEventListener("change", update_map);
+    document.getElementById("time").addEventListener("change", update_map);
+    document.getElementById("month").addEventListener("change", update_map);
+
+    // on change of select pollutant
+    document.getElementById("nox").addEventListener("change", update_map);
+    document.getElementById("no").addEventListener("change", update_map);
+    document.getElementById("no2").addEventListener("change", update_map);
+
+    // document.getElementById("fetch_data").addEventListener("click", update_map);
+
+    //console.log(pollutant_data);
+
+  </script>  
 </body>
 </html>

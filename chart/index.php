@@ -13,6 +13,7 @@
   $files = glob($root . "/data-*.xml");
 
 ?>
+<!DOCTYPE html>
 <html>
   <head>
 
@@ -372,6 +373,13 @@
           // convert time stamp into date, make sure its parsed as int
           var date = new Date(parseFloat(timestamp) * 1000); // javascript handles in ms not s
 
+          // if the date is not between 01/01/2015 to 31/12/2019 continue
+          if(date.getFullYear() < 2015 || date.getFullYear() > 2019)
+          {
+            continue;
+          }
+
+
           // check if the date already exists in dates array
           if(dates.indexOf(date.getFullYear()) == -1)
           {
@@ -386,11 +394,12 @@
             times.push(date.getHours());
           }
 
-          var month = date.getMonth();
+          var month = date.getMonth() + 1;
           var day = date.getDate();
 
           if(month < 10)
-              month = '0' + (month + 1).toString();
+              month = '0' + (month).toString();
+
           if(day < 10)
               day = '0' + day.toString();
 
@@ -565,8 +574,6 @@
           // remove the directory from the file name
           $file_name = str_replace($root . "/", "", $file_name);
 
-          //echo "<option value='" . $file_name . "'>" . $file_name . "</option>";
-
           // read the xml file 
           $xml = simplexml_load_file($root . "/" . $file_name);
 
@@ -579,14 +586,42 @@
             // get the geo location of the station
             $station_geo = $xml->attributes()->geocode;
 
-            // remove the extension from the file name
-            $file_name = str_replace(".xml", "", $file_name);
+            // perform xpath query on the xml to find all records timestamp values
+            $ts = $xml->xpath("//station/rec/@ts");
+          
+            // this value will count the dates found
+            $dates_found = 0;
 
-            // remove data- from the file name
-            $file_name = str_replace("data-", "", $file_name);
+            // check if the dates between the range 2015-01-01 to 2019-12-31
+            $startDate = date('Y-m-d', strtotime("2015-01-01"));
+            $endDate = date('Y-m-d', strtotime("2019-12-31"));
 
-            // create a html option
-            echo "<option value='$file_name'>$file_name - $station_name</option>";
+            foreach ($ts as $key => $value) 
+            {
+              // convert the timestamp to a date
+              $ts_date = date('Y-m-d',intval($value));
+            
+              // check if ts date is between start date and end date
+              if (($ts_date >= $startDate) && ($ts_date <= $endDate))
+              {
+                // increment the dates found within the range
+                $dates_found += 1;
+              }
+            }
+
+            // $dates_found is greater than zero
+            if($dates_found > 0)
+            {
+              // remove the extension from the file name
+              $file_name = str_replace(".xml", "", $file_name);
+
+              // remove data- from the file name
+              $file_name = str_replace("data-", "", $file_name);
+
+              // create a html option
+              echo "<option value='$file_name'>$file_name - $station_name</option>";
+            }
+
           }
         }
 
@@ -594,13 +629,10 @@
         echo "<script>$('#loading_tick').html('--');</script>";
       ?>
     </select>
-      
-    </br>
-  
+
     <!-- title and subtitle of station -->
     <h2 id="title" style="margin-bottom: 0px;"></h2>
     <h4 id="subtitle" style="margin-bottom: 0px; margin-top: 0px;"></h4>
-
 
     </br>
 

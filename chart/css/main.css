@@ -4,7 +4,7 @@
 */
 body {
     /* remove the margins for the main element to center the page */
-    margin: 0px 5% 0px 5%;
+    margin: 5% 5% 5% 5%;
     padding: 0px 0px 0px 0px;
 
     font-family: 'Roboto', sans-serif;
@@ -16,8 +16,8 @@ body {
 
     background-color: var(--secondary-color);
 
-    padding-top: 50px;
-    padding-bottom: 50px;
+    /* padding-top: 50px;
+    padding-bottom: 50px; */
 }
 
 footer {

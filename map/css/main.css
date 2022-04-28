@@ -4,7 +4,7 @@
 */
 body {
     /* remove the margins for the main element to center the page */
-    margin: 0px 5% 0px 5%;
+    margin: 5% 5% 5% 5%;
     padding: 0px 0px 0px 0px;
 
     font-family: 'Roboto', sans-serif;
@@ -14,7 +14,8 @@ body {
     --tertiary-color: rgb(45,45,45);
     --quaternary-color: rgb(230,230,230);
 
-    background-color: var(--secondary-color);
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
 
     padding-top: 50px;
     padding-bottom: 50px;
@@ -147,4 +148,21 @@ input[type=button], input[type=submit], input[type=reset] {
     text-transform: lowercase;
     font-variant: small-caps; */
     display: contents;
+}
+
+/* 
+    Button Style
+*/
+button {
+    background-color: var(--primary-color);
+    color: var(--secondary-color); 
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
 }
