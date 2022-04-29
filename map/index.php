@@ -331,12 +331,12 @@
       {
         // add an option to the element with id time of options
         if ((unique_hours[i]).toString().length == 1 ) {
-          $("#time").append("<option value='" + unique_hours[i] + "'>" + new Date('1970-01-01T' + "0"+unique_hours[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
+          $("#time").append("<option value='" + unique_hours[i] + "'>" + new Date('1970-01-01T' + "0"+unique_hours[i] + ":00:00" + '').toLocaleTimeString("en-UK", { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
         }
         else
         {
 
-          $("#time").append("<option value='" + unique_hours[i] + "'>" + new Date('1970-01-01T' + unique_hours[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
+          $("#time").append("<option value='" + unique_hours[i] + "'>" + new Date('1970-01-01T' + unique_hours[i] + ":00:00" + '').toLocaleTimeString("en-UK", { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
         }
       }
 

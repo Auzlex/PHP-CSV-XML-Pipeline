@@ -438,13 +438,13 @@
         for(var i = 0; i < times.length; i++)
         {
           // add an option to the element with id time of options
-          if ((times[i]).toString().length == 1 ) {
-            $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + "0"+times[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
+          if ( times[i] < 10 ) {
+            $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + "0"+times[i] + ":00:00" + '').toLocaleTimeString("en-UK", { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
           }
           else
           {
 
-            $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + times[i] + ":00:00" + '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
+            $("#time").append("<option value='" + times[i] + "'>" + new Date('1970-01-01T' + times[i] + ":00:00" + '').toLocaleTimeString("en-UK", { hour: '2-digit', minute: '2-digit', hour12: false }) + "</option>");
           }
         }
 
