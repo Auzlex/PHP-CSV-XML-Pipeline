@@ -1,26 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+<!-- XS RESTRICTION, XS PATTERNS, min,max inclusive, numeration -->
+<!-- contain at least co, no, no2 maybe included? -->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="station">
     <xs:complexType>
       <xs:sequence>
-        <xs:element maxOccurs="unbounded" ref="rec"/>
+        <xs:element name="rec" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:string">
+
+                <!-- validate the ts value to be within a valid unix time stamp range, and we must have this value -->
+                <xs:attribute name="ts" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:integer">
+                            <xs:minInclusive value="-3600"/>
+                            <xs:maxInclusive value="2147483647"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+
+                <!-- make sure nox at least has a value above 0, and we must have this value -->
+                <xs:attribute name="nox" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:decimal">
+                            <xs:minInclusive value="0"/>
+                            <!-- <xs:maxInclusive value="1000"/> -->
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+
+                <!-- make sure no2 at least has a value above 0, and we must have this value -->
+                <xs:attribute name="no2" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:decimal">
+                            <xs:minInclusive value="0"/>
+                            <!-- <xs:maxInclusive value="1000"/> -->
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+
+                <!-- make sure no at least has a value above 0, and we must have this value -->
+                <xs:attribute name="no" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:decimal">
+                            <xs:minInclusive value="0"/>
+                            <!-- <xs:maxInclusive value="1000"/> -->
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+
+                <xs:attribute type="xs:decimal" name="pm10" use="optional"/>
+                <xs:attribute type="xs:decimal" name="co" use="optional"/>
+                <xs:attribute type="xs:decimal" name="o3" use="optional"/>
+                <xs:attribute type="xs:decimal" name="so2" use="optional"/>
+
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
       </xs:sequence>
-      <xs:attribute name="geocode" use="required"/>
-      <xs:attribute name="id" use="required" type="xs:integer"/>
-      <xs:attribute name="name" use="required"/>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="rec">
-    <xs:complexType>
-      <xs:attribute name="co" type="xs:decimal"/>
-      <xs:attribute name="no" type="xs:decimal"/>
-      <xs:attribute name="no2" type="xs:decimal"/>
-      <xs:attribute name="nox" type="xs:decimal"/>
-      <xs:attribute name="o3" type="xs:decimal"/>
-      <xs:attribute name="pm10" type="xs:decimal"/>
-      <xs:attribute name="siteid" use="required" type="xs:integer"/>
-      <xs:attribute name="so2" type="xs:decimal"/>
-      <xs:attribute name="ts" type="xs:integer"/>
+      <xs:attribute type="xs:integer" name="id" use="required"/>
+      <xs:attribute type="xs:string" name="name" use="required"/>
+      <xs:attribute type="xs:string" name="geocode" use="required"/>
+      
     </xs:complexType>
   </xs:element>
 </xs:schema>

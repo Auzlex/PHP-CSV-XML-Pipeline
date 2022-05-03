@@ -5,14 +5,16 @@
   <!-- import css -->
   <link rel="stylesheet" href="css/main.css">
 
+  <!-- import google font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
-
+  <!-- import leaflet map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
 
+  <!-- import jquery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
@@ -24,6 +26,7 @@
 
   <div id="pollutant_selection" style="background-color: var(--tertiary-color); padding: 15px; color: var(--secondary-color); display: none;">
 
+    <!-- pollutant table -->
     <table border="0" cellpadding="2" cellspacing="0" style="border-left: 1px solid rgb(51, 51, 51); border-top: 1px solid rgb(51, 51, 51); margin: 1em 0px; padding: 0px; border-right-style: initial; border-bottom-style: initial; border-right-color: initial; border-bottom-color: initial; border-image: url('') initial; font-weight: normal; font-style: normal; font-size: 12.8px; vertical-align: baseline; border-collapse: separate; border-spacing: 0px; color: rgb(0, 0, 0); font-family: verdana, geneva, sans-serif; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); border-right-width: 0px; border-bottom-width: 0px;" width="100%">
         <tbody style="margin: 0px; padding: 0px; border: 0px; font-weight: inherit; font-style: inherit; font-size: 12.8px; vertical-align: baseline;">
           <tr style="margin: 0px; padding: 0px; border: 0px; font-weight: inherit; font-style: inherit; font-size: 12.8px; vertical-align: baseline;">
@@ -68,7 +71,7 @@
         </tbody>
     </table>
     
-    <!-- SELECTION pollutant -->
+    <!-- SELECTION pollutants -->
     <label for="nox">View Pollutants:</label>
 
     <input type="checkbox" id="nox" name="nox" value="nox">
@@ -99,13 +102,11 @@
 
     </br>
 
-    <!-- button to fetch data -->
-    <!-- <button id="fetch_data" style="margin-top: 10px;">Update Map</button> -->
-
   </div>
 
   </br>
 
+  <!-- map container -->
   <div id="map" style="width:100%; height:70%;"></div>
     
   <!-- SELECTION javascript -->
@@ -519,10 +520,6 @@
     document.getElementById("nox").addEventListener("change", update_map);
     document.getElementById("no").addEventListener("change", update_map);
     document.getElementById("no2").addEventListener("change", update_map);
-
-    // document.getElementById("fetch_data").addEventListener("click", update_map);
-
-    //console.log(pollutant_data);
 
   </script>  
 </body>

@@ -102,11 +102,53 @@
             }
         }
 
-        // // echo the xml lines read
-        // echo "<p>SplFileObject -> finished reading $file_name with $i lines</p>";
+
+        // if $i was only 2 then we have no data to write so fetch the header information from air-quality-data.csv
+        // this is jank but previous filtering has made it impossible to fetch previous data already removed
+        if($i == 2)
+        {
+            // open air-quality-data.csv
+            $file = new SplFileObject("air-quality-data-2004-2019.csv", "r");
+            $header = NULL; // this will store the header information from the first line of the CSV
+            $i2 = 0; // used to track lines
+
+            // while the file is not at the end
+            while (!$file->eof()) 
+            {
+                $i2++; // increment line count
+     
+                // get the current line data
+                $line = $file->fgets();
+                
+                // trim it, and then check if its empty
+                if (empty(trim($line))) {
+                    // skips the current iteration if line is empty
+                    continue;
+                }
+     
+                if($i2 > 0)
+                {
+                    // separate the csv line into an array
+                    $columns = explode(";", $line);
+
+                    // if file matches write attributes, because we now have data to do so
+                    if(("data-" . $columns[4] . ".xml") == $file_name)
+                    {
+                        $gps = explode(",", $columns[18]);
+                        // write attributes, because we now have data to do so
+                        $writer->writeAttribute('id', $columns[4]); // site id
+                        $writer->writeAttribute('name', $columns[17]); // site name
+                        $writer->writeAttribute('geocode', trim($gps[0]) . "," . trim($gps[1]) ); // site lat, long
+                        break;
+                    }
+                }
+                
+            }
+        }
 
         // end element
-        $writer->endElement();
+        $writer->fullEndElement();//endElement();
+        $writer->endDocument();
 
     }
 

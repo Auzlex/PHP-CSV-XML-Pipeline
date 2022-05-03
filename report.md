@@ -1,4 +1,4 @@
-# Advance Topics In Web Development: Critical Report On Methodology, Tools Utilized For Document Processing.
+# Advanced Topics In Web Development: Critical Report On Methodology, Tools Utilized For Document Processing.
 
 ## Document Processing A: Extract to CSV
 
@@ -33,7 +33,7 @@ Small example of generated contents of `data-188.xml`:
 	<rec ts="1084539600" nox="53.0" no2="32.0" no="14.0" pm10="23.0" co="0.2" o3="56.0" so2="3.0"/>
 </station>
 ```
-
+DOM oriented parses will read an entire document and is very useful in reading small file sizes that are quick and easy to load, however when it comes to larger files such as this `air-quality-data-2004-2019.csv`, we simply could have a system that won’t have enough ram or processing capability to handle the entire file. In this case stream-oriented parses are handy to fetch data when we need it and nothing else, this is more efficient on memory. 
 
 ## Google Charts: Extending Usage & Enhancing Visualisation
 
@@ -42,4 +42,7 @@ The google chart component used to visualise the carbon monoxide and selectable 
 ## Educational Attainment: 
 
 This assignment was an interesting challenge with difficulties and problems that had to be resolved with new additional knowledge. This section of the report will outline the learning outcomes achieved within this assignment.
+
 The major skill acquired during this assignment is the awareness, usage, and now reliance of using xpath for indexing, searching, and filtering for specific desired data that has been normalized and refactored. Utilization of xpath for fetching data was more performant and faster than using javascript to filter the data from a provided xml file. Using ajax request worked for charts as the data was selective and thus only 1 xml document was required at a time. Xpath was crucial in getting the map visualisation to work as we have multiple stations of data to selection from. Another turning point within the assignment was avoiding the use of storing data within arrays because the csv files was too large for them to be handled within ram.
+
+Xpath and XSD schemers has the potential to enforce data validation in various numerous ways and is a very adaptable and versatile means of enforcing validation on complex data structures as it uses DOM based elements to store data.

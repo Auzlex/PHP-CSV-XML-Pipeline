@@ -336,11 +336,6 @@
         $("#title").html(station_name); // replace the inner contents of the element "title"
         $("#subtitle").html("Location GPS: " + station_geo); // replace the inner contents of the element "subtitle"
 
-        // TODO: We need to generate 2 charts
-        // 1: A scatter chart to show a years worth of data (averaged by month) 
-        // from a specific station 
-        // for Carbon Monoxide (NO) at a certain time of day - say 08.00 hours.
-
         // generate a list of years from unix time stamp from elements inside the root xml element
         var dates = []; // stores dates
         var times = []; // stores times
@@ -459,17 +454,6 @@
 
         // fetch time information
         traverse_and_fetch_carbon_monoxide_records();
-
-
-       
-
-
-
-
-        // TODO: for maps use open street maps
-
-
-
       }
 
       function draw_scatter_chart(pre_computed_data)
