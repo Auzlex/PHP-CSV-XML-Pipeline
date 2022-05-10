@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- XS RESTRICTION, XS PATTERNS, min,max inclusive, numeration -->
 <!-- contain at least co, no, no2 maybe included? -->
-<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+    vc:minVersion="1.1">
   <xs:element name="station">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="rec" maxOccurs="unbounded" minOccurs="0">
           <xs:complexType>
-            <xs:simpleContent>
-              <xs:extension base="xs:string">
-
+            <!-- <xs:simpleContent> -->
+              <!-- <xs:extension base="xs:string"> -->
+                    
                 <!-- validate the ts value to be within a valid unix time stamp range, and we must have this value -->
                 <xs:attribute name="ts" use="required">
                     <xs:simpleType>
@@ -20,32 +23,29 @@
                     </xs:simpleType>
                 </xs:attribute>
 
-                <!-- make sure nox at least has a value above 0, and we must have this value -->
-                <xs:attribute name="nox" use="required">
+                <!-- make sure nox is decimal and at least exists -->
+                <xs:attribute name="nox" use="optional">
                     <xs:simpleType>
                         <xs:restriction base="xs:decimal">
-                            <xs:minInclusive value="0"/>
-                            <!-- <xs:maxInclusive value="1000"/> -->
+                            <!-- <xs:minInclusive value="0"/> -->
                         </xs:restriction>
                     </xs:simpleType>
                 </xs:attribute>
 
-                <!-- make sure no2 at least has a value above 0, and we must have this value -->
-                <xs:attribute name="no2" use="required">
+                <!-- make sure no2 is decimal and at least exists -->
+                <xs:attribute name="no2" use="optional">
                     <xs:simpleType>
                         <xs:restriction base="xs:decimal">
-                            <xs:minInclusive value="0"/>
-                            <!-- <xs:maxInclusive value="1000"/> -->
+                            <!-- <xs:minInclusive value="0"/> -->
                         </xs:restriction>
                     </xs:simpleType>
                 </xs:attribute>
 
-                <!-- make sure no at least has a value above 0, and we must have this value -->
-                <xs:attribute name="no" use="required">
+                <!-- make sure no is decimal and at least exists -->
+                <xs:attribute name="no" use="optional">
                     <xs:simpleType>
                         <xs:restriction base="xs:decimal">
-                            <xs:minInclusive value="0"/>
-                            <!-- <xs:maxInclusive value="1000"/> -->
+                            <!-- <xs:minInclusive value="0"/> -->
                         </xs:restriction>
                     </xs:simpleType>
                 </xs:attribute>
@@ -55,14 +55,28 @@
                 <xs:attribute type="xs:decimal" name="o3" use="optional"/>
                 <xs:attribute type="xs:decimal" name="so2" use="optional"/>
 
-              </xs:extension>
-            </xs:simpleContent>
-          </xs:complexType>
+                <xs:attribute type="xs:decimal" name="nvpm10" use="optional"/>
+                <xs:attribute type="xs:decimal" name="vpm10" use="optional"/>
+                
+                <xs:attribute type="xs:decimal" name="nvpm2.5" use="optional"/>
+                <xs:attribute type="xs:decimal" name="pm2.5" use="optional"/>
+                <xs:attribute type="xs:decimal" name="vpm2.5" use="optional"/>
+
+
+              <!-- </xs:extension> -->
+            <!-- </xs:simpleContent> -->
+
+              <!-- make sure nox or co are exiting with the xml -->
+              <xs:assert test="@nox or @co"/>
+            </xs:complexType>
         </xs:element>
       </xs:sequence>
       <xs:attribute type="xs:integer" name="id" use="required"/>
       <xs:attribute type="xs:string" name="name" use="required"/>
       <xs:attribute type="xs:string" name="geocode" use="required"/>
+
+      <!-- make sure ID, name and geocode -->
+      <xs:assert test="@id and @name and @geocode"/>
       
     </xs:complexType>
   </xs:element>
