@@ -49,7 +49,8 @@ Xpath and XSD schemers has the potential to enforce data validation in various n
 
 ## Running Demo
 
-You can find a running demo of the Google Charts [here][cedwards-php-pipeline-demo]:
+You can find a running demo of the bristol city pollution monitoring stations [here][cedwards-php-pipeline-demo]:
+The simple demo will process the large normalized data into a viewable form. with selectable simple filters.
 
 [cedwards-php-pipeline-demo]: https://charlesedwards.dev/demos/PHP-CSV-XML-Pipeline/map/
 
