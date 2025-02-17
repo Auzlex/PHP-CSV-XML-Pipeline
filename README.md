@@ -50,7 +50,7 @@ Xpath and XSD schemers has the potential to enforce data validation in various n
 ## Running Demo
 
 You can find a running demo of the bristol city pollution monitoring stations [here][cedwards-php-pipeline-demo]:
-The simple demo will process the large normalized data into a viewable form. with selectable simple filters.
+The simple demo will process the large volumes normalized data into a viewable form. with selectable simple filters. So will take time to construct fully.
 
 [cedwards-php-pipeline-demo]: https://charlesedwards.dev/demos/PHP-CSV-XML-Pipeline/map/
 
