@@ -46,3 +46,11 @@ This assignment was an interesting challenge with difficulties and problems that
 The major skill acquired during this assignment is the awareness, usage, and now reliance of using xpath for indexing, searching, and filtering for specific desired data that has been normalized and refactored. Utilization of xpath for fetching data was more performant and faster than using javascript to filter the data from a provided xml file. Using ajax request worked for charts as the data was selective and thus only 1 xml document was required at a time. Xpath was crucial in getting the map visualisation to work as we have multiple stations of data to selection from. Another turning point within the assignment was avoiding the use of storing data within arrays because the csv files was too large for them to be handled within ram.
 
 Xpath and XSD schemers has the potential to enforce data validation in various numerous ways and is a very adaptable and versatile means of enforcing validation on complex data structures as it uses DOM based elements to store data.
+
+## Running Demo
+
+You can find a running demo of the Google Charts [here][cedwards-php-pipeline-demo]:
+
+[cedwards-php-pipeline-demo]: https://charlesedwards.dev/demos/PHP-CSV-XML-Pipeline/map/
+
+
